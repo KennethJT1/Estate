@@ -7,8 +7,17 @@ import {
   JWT_SECRET,
   CLIENT_URL,
 } from "../config";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 import { emailTemplate } from "../utils/email";
+import { hashPassword, comparePassword } from "../utils/auth";
+import User from "../models/userModel";
+import {nanoid} from "nanoid";
+
+export const welcome = (req: Request, res: Response) => {
+  res.json({
+    data: "hello from nodejs api from routes yay",
+  });
+};
 
 export const preRegister = (
   req: Request,
@@ -17,7 +26,7 @@ export const preRegister = (
 ) => {
   //create jwt with email and password and make email a clickable link
   //only when user clicked the mail can then be registered
-    try {
+  try {
     const { email, password } = req.body;
     const token = jwt.sign({ email, password }, JWT_SECRET, {
       expiresIn: "1h",
@@ -35,7 +44,7 @@ export const preRegister = (
       ),
       (err: any, data: any) => {
         if (err) {
-          console.log("myerr===>",err);
+          console.log("myerr===>", err);
           return res.status(403).json({ ok: false });
         } else {
           console.log(data);
@@ -44,15 +53,50 @@ export const preRegister = (
       }
     );
   } catch (error: any) {
-    console.log(error.message);
+    console.log("catch err pre-register==>", error.message);
     return res.status(500).json({ error: "Something went wrong, try again" });
   }
 };
 
-export const register = (req: Request, res: Response, next: NextFunction) => {
+export const register = async (
+  req: JwtPayload,
+  res: Response,
+  next: NextFunction
+) => {
   try {
+    // console.log("token===>", req.body.token)
+    const { email, password } = jwt.verify(
+      req.body.token,
+      JWT_SECRET
+    ) as JwtPayload;
+    const hashedPassword = await hashPassword(password);
+
+    const createUser = await User.create({
+      username: nanoid(6),
+      email,
+      password: hashedPassword,
+    });
+
+    const user = await User.findOne({email}) 
+     const token = jwt.sign({ _id: user?._id }, JWT_SECRET, {
+       expiresIn: "1h",
+     });
+     const refreshToken = jwt.sign({ _id: user?._id }, JWT_SECRET, {
+       expiresIn: "7d",
+     });
+
+    //  user!.password = undefined;
+    //  user.resetCode = undefined;
+
+     return res.json({
+       token,
+       refreshToken,
+       user,
+     });
+
+    return res.status(201).json(user)
   } catch (error: any) {
-    console.log(error.message);
+    console.log("catch err register==>", error.message);
     return res.status(500).json({ error: "Something went wrong, try again" });
   }
 };
