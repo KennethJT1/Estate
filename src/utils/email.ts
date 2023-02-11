@@ -41,7 +41,7 @@ export const emailTemplate = (
       },
       Subject: {
         Charset: "UTF-8",
-        Data: "Welcome to KJT realist Estate",
+        Data: subject,
       },
     },
   };

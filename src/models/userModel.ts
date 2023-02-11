@@ -12,7 +12,7 @@ interface User {
   role?: {};
   enquiredProperties?: [];
   wishlist?: [];
-  resetCode?: "";
+  resetCode?: string;
 }
 
 
@@ -72,7 +72,10 @@ const userSchema = new Schema<User>({
       ref: "Ad",
     },
   ],
-  resetCode: "",
+  resetCode: {
+    type: String,
+    default: "",
+  },
 }, {
     timestamps: true,
 });

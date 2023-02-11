@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
-import SES from "aws-sdk/clients/ses.js";
+// import SES from "aws-sdk/clients/ses.js";
+const SES = require("aws-sdk/clients/ses.js");
 
 dotenv.config();
 
@@ -25,3 +26,14 @@ export const AWSSES = new SES(awsConfig);
 export const JWT_SECRET = process.env.JWT_SECRET as string;
 
 export const CLIENT_URL = process.env.CLIENT_URL as string;
+
+export function generateRandomAlphaNumeric(length:any) {
+  let result = "";
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i++) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+}
