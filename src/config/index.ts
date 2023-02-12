@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 // import SES from "aws-sdk/clients/ses.js";
-const SES = require("aws-sdk/clients/ses.js");
+import {SES} from "aws-sdk";
 
 dotenv.config();
 
