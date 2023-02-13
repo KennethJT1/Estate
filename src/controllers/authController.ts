@@ -47,20 +47,20 @@ export const preRegister = async (
 
     // validataion
     if (!validator.validate(email)) {
-      return res.status(400).json({ error: "A valid email is required" });
+      return res.json({ error: "A valid email is required" });
     }
     if (!password) {
-      return res.status(400).json({ error: "Password is required" });
+      return res.json({ error: "Password is required" });
     }
     if (password && password?.length < 4) {
       return res
-        .status(400)
+        
         .json({ error: "Password should be at least 4 characters" });
     }
 
     const user = await User.findOne({ email });
     if (user) {
-      return res.status(400).json({ error: "Email is taken" });
+      return res.json({ error: "Email is taken" });
     }
 
     const token = jwt.sign({ email, password }, JWT_SECRET, {
@@ -124,7 +124,7 @@ export const preRegister = async (
     });
   } catch (error: any) {
     console.log("catch err pre-register==>", error.message);
-    return res.status(500).json({ error: "Something went wrong, try again" });
+    return res.json({ error: "Something went wrong, try again" });
   }
 };
 
@@ -143,7 +143,7 @@ export const register = async (
 
      const existUser = await User.findOne({ email });
      if (existUser) {
-       return res.status(400).json({ error: "Email is taken" });
+       return res.json({ error: "Email is taken" });
      }
     
     const hashedPassword = await hashPassword(password);
@@ -158,7 +158,7 @@ export const register = async (
     tokenAndUserResponse(req, res, user);
   } catch (error: any) {
     console.log("catch err register==>", error.message);
-    return res.status(500).json({ error: "Something went wrong, try again" });
+    return res.json({ error: "Something went wrong, try again" });
   }
 };
 
@@ -174,7 +174,7 @@ export const login = async (
     // 2 compare password
     const match = await comparePassword(password, user?.password);
     if (!match) {
-      return res.status(404).json({ error: "Wrong password" });
+      return res.json({ error: "Wrong password" });
     }
 
    tokenAndUserResponse(req, res, user);
@@ -196,7 +196,6 @@ export const forgotPassword = async (
     // console.log("user===>", user);
     if (!user) {
       return res
-        .status(404)
         .json({ error: "Could not find user with that email" });
     } else {
       const resetCode = generateRandomAlphaNumeric(10);
@@ -222,17 +221,17 @@ export const forgotPassword = async (
         (err: any, data: any) => {
           if (err) {
             console.log(err);
-            return res.status(403).json({ ok: false });
+            return res.json({ ok: false });
           } else {
             console.log(data);
-            return res.status(200).json({ ok: true });
+            return res.json({ ok: true });
           }
         }
       );
     }
   } catch (error: any) {
     console.log("catch err forgotPassword==>", error.message);
-    return res.status(500).json({ error: "Something went wrong, try again" });
+    return res.json({ error: "Something went wrong, try again" });
   }
 };
 
@@ -252,7 +251,7 @@ export const accessAccount = async (
    tokenAndUserResponse(req, res, user);
   } catch (error: any) {
     console.log("catch err accessAccount==>", error.message);
-    return res.status(500).json({ error: "Something went wrong, try again" });
+    return res.json({ error: "Something went wrong, try again" });
   }
 };
 
