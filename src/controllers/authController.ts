@@ -34,15 +34,15 @@ const tokenAndUserResponse = (req: JwtPayload, res: Response, user:any) => {
   });
 };
 
-
 export const preRegister = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  //create jwt with email and password and make email a clickable link
-  //only when user clicked the mail can then be registered
+  // create jwt with email and password then email as clickable link
+  // only when user click on that email link, registeration completes
   try {
+    // console.log(req.body);
     const { email, password } = req.body;
 
     // validataion
@@ -53,9 +53,7 @@ export const preRegister = async (
       return res.json({ error: "Password is required" });
     }
     if (password && password?.length < 4) {
-      return res
-        
-        .json({ error: "Password should be at least 4 characters" });
+      return res.json({ error: "Password should be at least 4 characters" });
     }
 
     const user = await User.findOne({ email });
@@ -66,67 +64,123 @@ export const preRegister = async (
     const token = jwt.sign({ email, password }, JWT_SECRET, {
       expiresIn: "1h",
     });
-    console.log("token", token);
-
-    // AWSSES.sendEmail(
-    //   emailTemplate(
-    //     email,
-    //     `
-    //         <p>Please click the link below to activate your account</p>
-    //         <a href="${CLIENT_URL}/auth/account-activate/${token}">Activate my account</a>
-    //     `,
-    //     REPLY_TO,
-    //     "Activate your account"
-    //   ),
-    //   (err: any, data: any) => {
-    //     if (err) {
-    //       console.log("myerr===>", err);
-    //       return res.status(403).json({ ok: false });
-    //     } else {
-    //       console.log(data);
-    //       return res.json({ ok: true });
-    //     }
-    //   }
-    // );
-
-    // define the email message and options
-    const params = {
-      Destination: {
-        ToAddresses: ["walexeniola081@gmail.com"],
-      },
-      Message: {
-        Body: {
-          Html: {
-            Charset: "UTF-8",
-            Data: "<p>HTML-formatted email body</p>",
-          },
-          Text: {
-            Charset: "UTF-8",
-            Data: "Plain-text email body",
-          },
-        },
-        Subject: {
-          Charset: "UTF-8",
-          Data: "Email subject",
-        },
-      },
-      Source: "sender@example.com",
-      ReplyToAddresses: ["kennetholuwatomiwa966@gmail.com"],
-    };
-
-    // send the email
-    AWSSES.sendEmail(params, (err: any, data: any) => {
-      if (err) {
-        console.log("Error:", err);
-      } else {
-        console.log("Email sent:", data);
+console.log("token", token)
+    AWSSES.sendEmail(
+      emailTemplate(
+        email,
+        `
+      <p>Please click the link below to activate your account.</p>
+      <a href="${CLIENT_URL}/auth/account-activate/${token}">Activate my account</a>
+      `,
+        REPLY_TO,
+        "Activate your acount"
+      ),
+      (err, data) => {
+        if (err) {
+          console.log(err);
+          return res.json({ ok: false });
+        } else {
+          console.log(data);
+          return res.json({ ok: true });
+        }
       }
-    });
-  } catch (error: any) {
-    console.log("catch err pre-register==>", error.message);
-    return res.json({ error: "Something went wrong, try again" });
+    );
+  } catch (err) {
+    console.log(err);
+    return res.json({ error: "Something went wrong. Try again." });
   }
 };
+
+// export const preRegister = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) => {
+//   //create jwt with email and password and make email a clickable link
+//   //only when user clicked the mail can then be registered
+//   try {
+//     const { email, password } = req.body;
+
+//     // validataion
+//     if (!validator.validate(email)) {
+//       return res.json({ error: "A valid email is required" });
+//     }
+//     if (!password) {
+//       return res.json({ error: "Password is required" });
+//     }
+//     if (password && password?.length < 4) {
+//       return res.json({ error: "Password should be at least 4 characters" });
+//     }
+
+//     const user = await User.findOne({ email });
+//     if (user) {
+//       return res.json({ error: "Email is taken" });
+//     }
+
+//     const token = jwt.sign({ email, password }, JWT_SECRET, {
+//       expiresIn: "1h",
+//     });
+//     console.log("token", token);
+
+//     // AWSSES.sendEmail(
+//     //   emailTemplate(
+//     //     email,
+//     //     `
+//     //         <p>Please click the link below to activate your account</p>
+//     //         <a href="${CLIENT_URL}/auth/account-activate/${token}">Activate my account</a>
+//     //     `,
+//     //     REPLY_TO,
+//     //     "Activate your account"
+//     //   ),
+//     //   (err: any, data: any) => {
+//     //     if (err) {
+//     //       console.log("myerr===>", err);
+//     //       return res.status(403).json({ ok: false });
+//     //     } else {
+//     //       console.log(data);
+//     //       return res.json({ ok: true });
+//     //     }
+//     //   }
+//     // );
+
+//     // define the email message and options
+//     const params = {
+//       Destination: {
+//         ToAddresses: ["walexeniola081@gmail.com"],
+//       },
+//       Message: {
+//         Body: {
+//           Html: {
+//             Charset: "UTF-8",
+//             Data: "<p>HTML-formatted email body</p>",
+//           },
+//           Text: {
+//             Charset: "UTF-8",
+//             Data: "Plain-text email body",
+//           },
+//         },
+//         Subject: {
+//           Charset: "UTF-8",
+//           Data: "Email subject",
+//         },
+//       },
+//       Source: "oluwatomiwa96@gmail.com",
+//       ReplyToAddresses: ["kennetholuwatomiwa966@gmail.com"],
+//     };
+
+//     // send the email
+//     AWSSES.sendEmail(params, (err: any, data: any) => {
+//       if (err) {
+//         console.log("Error:", err);
+//       } else {
+//         console.log("Email sent:", data);
+//       }
+//     });
+//   } catch (error: any) {
+//     console.log("catch err pre-register==>", error.message);
+//     return res.json({ error: "Something went wrong, try again" });
+//   }
+// };
 
 export const register = async (
   req: JwtPayload,
