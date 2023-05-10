@@ -64,7 +64,9 @@ export const preRegister = async (
     const token = jwt.sign({ email, password }, JWT_SECRET, {
       expiresIn: "1h",
     });
-console.log("token", token)
+
+console.log("token", token);
+
     AWSSES.sendEmail(
       emailTemplate(
         email,

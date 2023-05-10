@@ -1,6 +1,8 @@
 import dotenv from "dotenv";
 // import SES from "aws-sdk/clients/ses.js";
-import {SES} from "aws-sdk";
+import S3 from "aws-sdk/clients/s3.js";
+import { SES } from "aws-sdk";
+import NodeGeocoder from "node-geocoder";
 
 dotenv.config();
 
@@ -23,9 +25,19 @@ const awsConfig = {
 
 export const AWSSES = new SES(awsConfig);
 
+export const AWSS3 = new S3(awsConfig);
+
 export const JWT_SECRET = process.env.JWT_SECRET as string;
 
 export const CLIENT_URL = process.env.CLIENT_URL as string;
+
+const options = {
+  provider: process.env.GOOGLE_PROVIDER,
+  apiKey: process.env.GOOGLE_APIKEY,
+  formatter: null,
+} as unknown as any;
+
+export const GOOGLE_GEOCODER = NodeGeocoder(options); 
 
 export function generateRandomAlphaNumeric(length:any) {
   let result = "";
