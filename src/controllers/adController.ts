@@ -1,17 +1,23 @@
 import { Request, Response, NextFunction } from "express";
-import { AWSS3, GOOGLE_GEOCODER } from "../config";
-import { nanoid } from "nanoid";
+import {
+  AWSS3,
+  AWSSES,
+  GOOGLE_GEOCODER,
+  generateRandomAlphaNumeric,
+} from "../config";
 import slugify from "slugify";
 import Ad from "../models/adModel";
-import User from "../models/userModel";
+import User, { IUser } from "../models/userModel";
 import { emailTemplate } from "../utils/email";
 import { JwtPayload } from "jsonwebtoken";
+import AWS from 'aws-sdk';
+
 
 export const uploadImage = async (req: Request, res: Response) => {
   try {
     const { image } = req.body;
 
-    const base64Image = new Buffer.from(
+    const base64Image = Buffer.from(
       image.replace(/^data:image\/\w+;base64,/, ""),
       "base64"
     );
@@ -19,14 +25,14 @@ export const uploadImage = async (req: Request, res: Response) => {
 
     // image params
     const params = {
-      Bucket: "realist-app-udemy-course-bucket",
-      Key: `${nanoid()}.${type}`,
+      Bucket: "kjt-realist-app-bucket",
+      Key: `${generateRandomAlphaNumeric(6)}.${type}`,
       Body: base64Image,
       ACL: "public-read",
       ContentEncoding: "base64",
       ContentType: `image/${type}`,
     };
-
+    AWS.config.logger = console;
     AWSS3.upload(params, (err: any, data: any) => {
       if (err) {
         console.log(err);
@@ -88,7 +94,9 @@ export const create = async (req: JwtPayload, res: Response) => {
         coordinates: [geo?.[0]?.longitude, geo?.[0]?.latitude],
       },
       googleMap: geo,
-      slug: slugify(`${type}-${address}-${price}-${nanoid(6)}`),
+      slug: slugify(
+        `${type}-${address}-${price}-${generateRandomAlphaNumeric(6)}`
+      ),
     }).save();
 
     // change user role to Seller
@@ -137,7 +145,6 @@ export const read = async (req: Request, res: Response) => {
       "postedBy",
       "name username email phone company photo.Location"
     );
-    // console.log("AD => ", ad);
 
     // related
     const related = await Ad.find({
@@ -145,8 +152,8 @@ export const read = async (req: Request, res: Response) => {
       action: ad!.action,
       type: ad!.type,
       address: {
-        $regex: ad.googleMap[0]?.admininstrativeLevels?.levelllong || "",
-        $options: "i",
+        $regex: ad!.googleMap[0]?.admininstrativeLevels?.levelllong || "",
+        $options: "i", //ignore lowercase/uppercase characters
       },
     })
       .limit(3)
@@ -157,3 +164,114 @@ export const read = async (req: Request, res: Response) => {
     console.log(err);
   }
 };
+
+// export const addToWishlist = async (req: JwtPayload, res: Response) => {
+//   try {
+//     const user = await User.findByIdAndUpdate(
+//       req.user._id,
+//       {
+//         $addToSet: { wishlist: req.body.adId },
+//       },
+//       { new: true }
+//     );
+
+//     const { password, resetCode, ...rest } = user!._doc;
+
+//     // console.log("added to wishlist => ", rest);
+
+//     res.json(rest);
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
+
+
+// export const addToWishlist = async (req: JwtPayload, res: Response): Promise<void> => {
+//   try {
+//   const user: IUser | null = await User.findByIdAndUpdate(
+//   req.user._id,
+//   {
+//     $addToSet: { wishlist: req.body.adId },
+//   },
+//   { new: true }
+// ).lean();
+
+// if (!user) {
+//   throw new Error("User not found");
+// }
+
+// const { password, resetCode, ...rest } = user;
+
+// res.json(rest);
+
+//   } catch (err: any) {
+//     console.log(err);
+//     res.status(500).send("Internal Server Error");
+//   }
+// };
+
+
+// export const removeFromWishlist = async (req: JwtPayload, res: Response) => {
+//   try {
+//     const user = await User.findByIdAndUpdate(
+//       req.user._id,
+//       {
+//         $pull: { wishlist: req.params.adId },
+//       },
+//       { new: true }
+//     );
+
+//     const { password, resetCode, ...rest } = user!._doc;
+//     // console.log("remove from wishlist => ", rest);
+
+//     res.json(rest);
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };
+
+// export const contactSeller = async (req: JwtPayload, res: Response) => {
+//   try {
+//     const { name, email, message, phone, adId } = req.body;
+//     const ad = await Ad.findById(adId).populate("postedBy", "email");
+
+//     const user = await User.findByIdAndUpdate(req.user._id, {
+//       $addToSet: { enquiredProperties: adId },
+//     });
+
+//     if (!user) {
+//       return res.json({ error: "Could not find user with that email" });
+//     } else {
+//       // send email
+//       AWSSES.sendEmail(
+//         emailTemplate(
+//           ad.postedBy.email,
+//           `
+//         <p>You have received a new customer enquiry</p>
+
+//           <h4>Customer details</h4>
+//           <p>Name: ${name}</p>
+//           <p>Email: ${email}</p>
+//           <p>Phone: ${phone}</p>
+//           <p>Message: ${message}</p>
+
+//         <a href="${CLIENT_URL}/ad/${ad.slug}">${ad.type} in ${ad.address} for ${ad.action} ${ad.price}</a>
+//         `,
+//           email,
+//           "New enquiry received"
+//         ),
+//         (err:any, data:any) => {
+//           if (err) {
+//             console.log(err);
+//             return res.json({ ok: false });
+//           } else {
+//             console.log(data);
+//             return res.json({ ok: true });
+//           }
+//         }
+//       );
+//     }
+//   } catch (err) {
+//     console.log(err);
+//   }
+// };

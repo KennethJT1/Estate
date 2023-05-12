@@ -4,6 +4,7 @@ import morgan from "morgan";
 import { DATABASE } from "./config";
 import mongoose from "mongoose";
 import authRoute from "./routes/auth"
+import adRoute from "./routes/ad"
 
 
 const app = express();
@@ -22,6 +23,7 @@ app.use(cors());
 
 //ROUTES
 app.use("/", authRoute)
+app.use("/", adRoute)
 
 const port = process.env.PORT || 3166;
 
