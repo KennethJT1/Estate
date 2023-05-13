@@ -14,6 +14,7 @@ import { hashPassword, comparePassword } from "../utils/auth";
 import User from "../models/userModel";
 import { nanoid } from "nanoid";
 import validator from "email-validator";
+import Ad from "../models/adModel";
 
 
 const tokenAndUserResponse = (req: JwtPayload, res: Response, user:any) => {
@@ -227,6 +228,9 @@ export const login = async (
     const { email, password } = req.body;
     // 1 find user by email
     const user = await User.findOne({ email });
+    if (!user) {
+      return res.json({ error: "User not found. You need to register" });
+    }
     // 2 compare password
     const match = await comparePassword(password, user?.password);
     if (!match) {
@@ -397,10 +401,37 @@ export const updateProfile = async(req: JwtPayload, res: Response, next: NextFun
 };
 
 
-// export const publicProfile = async(req: Request, res: Response, next: NextFunction) => {
-//   try {
-//   } catch (error: any) {
-//     console.log("catch err publicProfile==>", error.message);
-//     return res.status(500).json({ error: "Something went wrong, try again" });
-//   }
-// };
+export const agents = async (req: Request, res: Response) => {
+  try {
+    const agents = await User.find({ role: "Seller" }).select(
+      "-password -role -enquiredProperties -wishlist -photo.key -photo.Key -photo.Bucket"
+    );
+    res.json(agents);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const agentAdCount = async (req: Request, res: Response) => {
+  try {
+    const ads = await Ad.find({ postedBy: req.params._id }).select("_id");
+    // console.log("ads count => ", ads);
+    res.json(ads);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const agent = async (req: Request, res: Response) => {
+  try {
+    const user = await User.findOne({ username: req.params.username }).select(
+      "-password -role -enquiredProperties -wishlist -photo.key -photo.Key -photo.Bucket"
+    );
+    const ads = await Ad.find({ postedBy: user!._id }).select(
+      "-photos.key -photos.Key -photos.ETag -photos.Bucket -location -googleMap"
+    );
+    res.json({ user, ads });
+  } catch (err) {
+    console.log(err);
+  }
+}; 

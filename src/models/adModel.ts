@@ -1,124 +1,26 @@
-import { model, Schema, Types } from "mongoose";
+// import { model, Schema, Types } from "mongoose";
 
-interface IAd {
-  photos: [{}];
-  price: number;
-  address: string;
-  bedrooms?: number;
-  bathrooms?: number;
-  landsize: string;
-  carpark?: number;
-  location: {};
-  title: string;
-  slug: string;
-  description: {};
-  postedBy: {};
-  sold?: boolean;
-  googleMap: any;
-  type: string;
-  action: string;
-  views?: number;
-}
-
-const adSchema = new Schema<IAd>(
-  {
-    photos: [{}],
-    price: { type: Number, maxLength: 255 },
-    address: { type: String, maxLength: 255, required: true },
-    bedrooms: Number,
-    bathrooms: Number,
-    landsize: String,
-    carpark: Number,
-    location: {
-      type: {
-        type: String,
-        enum: ["Point"],
-        default: "Point",
-      },
-      coordinates: {
-        type: [Number],
-        default: [3.41239, 6.46276],
-      },
-    },
-    title: {
-      type: String,
-      maxLength: 255,
-    },
-    slug: {
-      type: String,
-      lowercase: true,
-      unique: true,
-    },
-    description: {},
-    postedBy: {
-      type: Types.ObjectId,
-      ref: "User",
-    },
-    sold: { type: Boolean, default: false },
-    googleMap: {},
-    type: {
-      type: String,
-      default: "Other",
-    },
-    action: {
-      type: String,
-      default: "Sell",
-    },
-    views: {
-      type: Number,
-      default: 0,
-    },
-  },
-  { timestamps: true }
-);
-
-adSchema.index({ location: "2dsphere" });
-export default model("Ad", adSchema);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import { Schema, Model, model, Document, Types } from "mongoose";
-
-// interface IAd extends Document {
-//   photos: object[];
+// interface IAd {
+//   photos: [{}];
 //   price: number;
 //   address: string;
-//   bedrooms: number;
-//   bathrooms: number;
+//   bedrooms?: number;
+//   bathrooms?: number;
 //   landsize: string;
-//   carpark: number;
-//   location: {
-//     type: string;
-//     coordinates: number[];
-//   };
+//   carpark?: number;
+//   location: {};
 //   title: string;
 //   slug: string;
-//   description: object;
-//   postedBy: Types.ObjectId;
-//   sold: boolean;
+//   description: {};
+//   postedBy: any;
+//   sold?: boolean;
 //   googleMap: any;
 //   type: string;
 //   action: string;
-//   views: number;
-//   createdAt: Date;
-//   updatedAt: Date;
+//   views?: number;
 // }
 
-// const AdSchema: Schema = new Schema(
+// const adSchema = new Schema<IAd>(
 //   {
 //     photos: [{}],
 //     price: { type: Number, maxLength: 255 },
@@ -135,7 +37,7 @@ export default model("Ad", adSchema);
 //       },
 //       coordinates: {
 //         type: [Number],
-//         default: [151.20929, -33.86882],
+//         default: [3.41239, 6.46276],
 //       },
 //     },
 //     title: {
@@ -148,7 +50,10 @@ export default model("Ad", adSchema);
 //       unique: true,
 //     },
 //     description: {},
-//     postedBy: { type: Types.ObjectId, ref: "User" },
+//     postedBy: {
+//       type: Types.ObjectId,
+//       ref: "User",
+//     },
 //     sold: { type: Boolean, default: false },
 //     googleMap: {},
 //     type: {
@@ -167,8 +72,103 @@ export default model("Ad", adSchema);
 //   { timestamps: true }
 // );
 
-// AdSchema.index({ location: "2dsphere" });
+// adSchema.index({ location: "2dsphere" });
+// export default model("Ad", adSchema);
 
-// const Ad: Model<IAd> = model<IAd>("Ad", AdSchema);
 
-// export default Ad;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import { Schema, Model, model, Document, Types } from "mongoose";
+
+interface IAd extends Document {
+  photos: object[];
+  price: number;
+  address: string;
+  bedrooms: number;
+  bathrooms: number;
+  landsize: string;
+  carpark: number;
+  location: {
+    type: string;
+    coordinates: number[];
+  };
+  title: string;
+  slug: string;
+  description: object;
+  postedBy: any;
+  sold: boolean;
+  googleMap: any;
+  type: string;
+  action: string;
+  views: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const AdSchema: Schema = new Schema(
+  {
+    photos: [{}],
+    price: { type: Number, maxLength: 255 },
+    address: { type: String, maxLength: 255, required: true },
+    bedrooms: Number,
+    bathrooms: Number,
+    landsize: String,
+    carpark: Number,
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
+      },
+      coordinates: {
+        type: [Number],
+        default: [151.20929, -33.86882],
+      },
+    },
+    title: {
+      type: String,
+      maxLength: 255,
+    },
+    slug: {
+      type: String,
+      lowercase: true,
+      unique: true,
+    },
+    description: {},
+    postedBy: { type: Types.ObjectId, ref: "User" },
+    sold: { type: Boolean, default: false },
+    googleMap: {},
+    type: {
+      type: String,
+      default: "Other",
+    },
+    action: {
+      type: String,
+      default: "Sell",
+    },
+    views: {
+      type: Number,
+      default: 0,
+    },
+  },
+  { timestamps: true }
+);
+
+AdSchema.index({ location: "2dsphere" });
+
+const Ad: Model<IAd> = model<IAd>("Ad", AdSchema);
+
+export default Ad;
