@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon src/index.ts",
-    "start": "nodemon dist/index.js",
+    "start": "tsc -w && nodemon dist/index.js",
     "compile": "tsc -w"
   },
   "dependencies": {
