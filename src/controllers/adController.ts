@@ -33,7 +33,7 @@ export const uploadImage = async (req: Request, res: Response) => {
       ContentEncoding: "base64",
       ContentType: `image/${type}`,
     };
-    AWS.config.logger = console;
+    // AWS.config.logger = console;
     AWSS3.upload(params, (err: any, data: any) => {
       if (err) {
         console.log(err);
@@ -86,7 +86,6 @@ export const create = async (req: JwtPayload, res: Response) => {
     }
 
     const geo = await GOOGLE_GEOCODER.geocode(address);
-    // console.log("geo => ", geo);
     const ad = await new Ad({
       ...req.body,
       postedBy: req.user._id,
@@ -350,5 +349,67 @@ export const wishlist = async (req:JwtPayload, res: Response) => {
     res.json(ads);
   } catch (err) {
     console.log(err);
+  }
+};
+
+export const adsForSell = async (req: Request, res: Response) => {
+  try {
+    const ads = await Ad.find({ action: "Sell" })
+      .select("-googleMap -location -photo.Key -photo.key -photo.ETag")
+      .sort({ createdAt: -1 })
+      .limit(24);
+
+    res.json(ads);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const adsForRent = async (req: Request, res: Response) => {
+  try {
+    const ads = await Ad.find({ action: "Rent" })
+      .select("-googleMap -location -photo.Key -photo.key -photo.ETag")
+      .sort({ createdAt: -1 })
+      .limit(24);
+
+    res.json(ads);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+export const search = async (req: JwtPayload, res: Response) => {
+  try {
+    console.log("req query", req.query);
+    const { action, address, type, priceRange } = req.query;
+
+    const geo = await GOOGLE_GEOCODER.geocode(address);
+
+
+    const ads = await Ad.find({
+      action: action === "Buy" ? "Sell" : "Rent",
+      type,
+      price: {
+        $gte: parseInt(priceRange[0]),
+        $lte: parseInt(priceRange[1]),
+      },
+      location: {
+        $near: {
+          $maxDistance: 50000, // 1000m = 1km
+          $geometry: {
+            type: "Point",
+            coordinates: [geo?.[0]?.longitude, geo?.[0]?.latitude],
+          },
+        },
+      },
+    })
+      .limit(24)
+      .sort({ createdAt: -1 })
+      .select(
+        "-photos.key -photos.Key -photos.ETag -photos.Bucket -location -googleMap"
+      );
+    res.json(ads);
+  } catch (err) {
+    console.log();
   }
 };

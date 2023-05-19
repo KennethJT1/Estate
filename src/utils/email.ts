@@ -1,10 +1,5 @@
 import {
-  AWSSES,
-  DATABASE,
   EMAIL_FROM,
-  REPLY_TO,
-  JWT_SECRET,
-  CLIENT_URL,
 } from "../config";
 
 const style = `
@@ -31,7 +26,7 @@ export const emailTemplate = (
           Data: `
               <html>
               <div style="${style}">
-              <h1>Welcome to KJT realist Estate</h1>
+              <h1>Welcome to KJT Estate App</h1>
                 ${content}
               <p>&copy; ${new Date().getFullYear()}</p>
               </div>

@@ -9,19 +9,16 @@ import adRoute from "./routes/ad"
 
 const app = express();
 
-//Database configuration
 mongoose.set("strictQuery", false);
 mongoose
   .connect(DATABASE)
   .then(() => console.log("Database connected"))
   .catch((err) => console.error(err));
 
-// middlewares
 app.use(express.json({ limit: "10mb" }));
 app.use(morgan("dev"));
 app.use(cors());
 
-//ROUTES
 app.use("/", authRoute)
 app.use("/", adRoute)
 

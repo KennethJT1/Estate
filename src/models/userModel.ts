@@ -83,5 +83,3 @@ const userSchema: Schema = new Schema<IUser>({
 const User: Model<IUser> = model<IUser>("User", userSchema);
 
 export default User;
-
-// export default model("User", userSchema);
